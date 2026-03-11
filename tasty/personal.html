@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Helix | Scroll Experiment</title>
+    <style>
+        body {
+            margin: 0;
+            background: #050505;
+            color: #0ff;
+            font-family: 'Courier New', monospace;
+            height: 15000px; /* Long enough to scroll */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        #ui {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #0ff;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            z-index: 100;
+        }
+
+        .helix-container {
+            position: relative;
+            width: 200px;
+            margin-top: 100px;
+        }
+
+        .node {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #0ff;
+            box-shadow: 0 0 15px #0ff;
+            transform: translateX(var(--x));
+        }
+
+        .line {
+            position: absolute;
+            height: 1px;
+            background: rgba(0, 255, 255, 0.3);
+            width: var(--w);
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        Depth: <span id="depth">0</span> units<br>
+        Status: <span id="status">descending</span>
+    </div>
+
+    <div class="helix-container" id="helix"></div>
+
+    <script>
+        const container = document.getElementById('helix');
+        const depthEl = document.getElementById('depth');
+        const nodesCount = 500; // Total nodes to generate
+        const spacing = 30; // Vertical pixels between nodes
+
+        // Generate the DNA structure
+        for (let i = 0; i < nodesCount; i++) {
+            const angle = i * 0.2;
+            const x = Math.sin(angle) * 80;
+            const zIndex = Math.cos(angle) > 0 ? 1 : -1;
+
+            // Create Left Node
+            const nodeL = document.createElement('div');
+            nodeL.className = 'node';
+            nodeL.style.top = `${i * spacing}px`;
+            nodeL.style.setProperty('--x', `${x}px`);
+            nodeL.style.opacity = zIndex > 0 ? 1 : 0.3;
+            container.appendChild(nodeL);
+
+            // Create Right Node (Opposite phase)
+            const nodeR = document.createElement('div');
+            nodeR.className = 'node';
+            nodeR.style.top = `${i * spacing}px`;
+            nodeR.style.setProperty('--x', `${-x}px`);
+            nodeR.style.opacity = zIndex > 0 ? 0.3 : 1;
+            container.appendChild(nodeR);
+
+            // Connecting line
+            if (i % 2 === 0) {
+                const line = document.createElement('div');
+                line.className = 'line';
+                line.style.top = `${i * spacing + 5}px`;
+                line.style.setProperty('--w', `${Math.abs(x * 2)}px`);
+                container.appendChild(line);
+            }
+        }
+
+        // Update UI on scroll
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            depthEl.innerText = Math.floor(scrolled / 10);
+            
+            // Random color shift based on scroll
+            const hue = (scrolled / 50) % 360;
+            document.body.style.filter = `hue-rotate(${hue}deg)`;
+        });
+    </script>
+</body>
+</html>
