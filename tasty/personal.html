@@ -70,58 +70,64 @@
     <div class="helix-container" id="helix"></div>
 
     <script>
-        const container = document.getElementById('helix');
-        const loopsEl = document.getElementById('loops');
-        const stableEl = document.getElementById('stable');
-        const msgEl = document.getElementById('msg');
-        
-        let loopCount = 0;
-        let stability = 100;
+    const container = document.getElementById('helix');
+    const loopsEl = document.getElementById('loops');
+    const stableEl = document.getElementById('stable');
+    const msgEl = document.getElementById('msg');
+    
+    let loopCount = 0;
+    let stability = 100;
 
-        // Create the Helix (Same logic as before but more nodes)
-        for (let i = 0; i < 400; i++) {
-            const angle = i * 0.2;
-            const x = Math.sin(angle) * 100;
-            const node = document.createElement('div');
-            node.className = 'node';
-            node.style.top = `${i * 25}px`;
-            node.style.setProperty('--x', `${x}px`);
-            container.appendChild(node);
+    // Generate Helix nodes
+    for (let i = 0; i < 400; i++) {
+        const angle = i * 0.2;
+        const x = Math.sin(angle) * 100;
+        const node = document.createElement('div');
+        node.className = 'node';
+        node.style.top = `${i * 25}px`;
+        node.style.setProperty('--x', `${x}px`);
+        container.appendChild(node);
+    }
+
+    // High-precision scroll monitor
+    window.onscroll = () => {
+        const scrolled = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const bodyHeight = document.documentElement.scrollHeight;
+        
+        // TRIGGER ZONE: If we are within 10px of the bottom
+        if (scrolled + windowHeight >= bodyHeight - 10) {
+            
+            // 🌀 THE INSTANT TELEPORT
+            // We use scrollTo(0, 0) but immediately move it to 5px to prevent bounce
+            window.scrollTo({
+                top: 5,
+                behavior: 'instant' // Force no-animation snap
+            });
+
+            // Dimension Logic
+            loopCount++;
+            stability -= 2;
+            loopsEl.innerText = loopCount;
+            stableEl.innerText = Math.max(0, stability) + "%";
+
+            // Visual Feedback
+            document.body.classList.add('glitch');
+            setTimeout(() => document.body.classList.remove('glitch'), 200);
+
+            if (loopCount % 2 !== 0) {
+                document.body.style.transform = "rotate(180deg)";
+                msgEl.innerText = "REALITY INVERTED";
+            } else {
+                document.body.style.transform = "rotate(0deg)";
+                msgEl.innerText = "RECURSION ACTIVE";
+            }
         }
 
-        window.addEventListener('scroll', () => {
-            const scrolled = window.scrollY;
-            const maxScroll = document.body.scrollHeight - window.innerHeight;
-
-            // 🌀 THE TELEPORTATION LOGIC
-            if (scrolled >= maxScroll - 2) {
-                // Teleport to top
-                window.scrollTo(0, 2);
-                
-                // Trigger Dimension Shift
-                loopCount++;
-                stability -= 5;
-                loopsEl.innerText = loopCount;
-                stableEl.innerText = Math.max(0, stability) + "%";
-
-                // Visual Mind-Bend
-                document.body.classList.add('glitch');
-                setTimeout(() => document.body.classList.remove('glitch'), 500);
-
-                // Rotate Reality every 2 loops
-                if (loopCount % 2 === 0) {
-                    document.body.style.transform = "rotate(180deg)";
-                    msgEl.innerText = "REALITY INVERTED";
-                } else {
-                    document.body.style.transform = "rotate(0deg)";
-                    msgEl.innerText = "RECURSION ACTIVE";
-                }
-            }
-
-            // Hue shift as we descend
-            const hue = (scrolled / 20) % 360;
-            document.body.style.filter = `hue-rotate(${hue}deg) brightness(${stability/100})`;
-        });
-    </script>
+        // Color shift
+        const hue = (scrolled / 20) % 360;
+        document.body.style.filter = `hue-rotate(${hue}deg)`;
+    };
+</script>
 </body>
 </html>
