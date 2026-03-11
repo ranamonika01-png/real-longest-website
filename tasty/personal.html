@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Helix | Scroll Experiment</title>
+    <title>Dimension Loop | BobaScroll</title>
     <style>
         body {
             margin: 0;
-            background: #050505;
+            background: #000;
             color: #0ff;
             font-family: 'Courier New', monospace;
-            height: 15000px; /* Long enough to scroll */
+            height: 10000px; 
             display: flex;
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         #ui {
@@ -22,12 +23,12 @@
             top: 20px;
             left: 20px;
             padding: 15px;
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid #0ff;
-            pointer-events: none;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #f0f;
             text-transform: uppercase;
             letter-spacing: 2px;
             z-index: 100;
+            box-shadow: 0 0 10px #f0f;
         }
 
         .helix-container {
@@ -38,79 +39,88 @@
 
         .node {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: #0ff;
-            box-shadow: 0 0 15px #0ff;
+            box-shadow: 0 0 20px #0ff;
             transform: translateX(var(--x));
         }
 
-        .line {
-            position: absolute;
-            height: 1px;
-            background: rgba(0, 255, 255, 0.3);
-            width: var(--w);
-            left: 50%;
-            transform: translateX(-50%);
+        /* Glitch effect for loop transition */
+        .glitch {
+            animation: glitch 0.2s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(2px, 0); }
+            50% { transform: translate(-2px, -2px); filter: hue-rotate(90deg); }
+            100% { transform: translate(0, 2px); }
         }
     </style>
 </head>
 <body>
 
     <div id="ui">
-        Depth: <span id="depth">0</span> units<br>
-        Status: <span id="status">descending</span>
+        Loop: <span id="loops">0</span><br>
+        Stability: <span id="stable">100%</span><br>
+        <span id="msg" style="color: #f0f;">DESCENDING...</span>
     </div>
 
     <div class="helix-container" id="helix"></div>
 
     <script>
         const container = document.getElementById('helix');
-        const depthEl = document.getElementById('depth');
-        const nodesCount = 500; // Total nodes to generate
-        const spacing = 30; // Vertical pixels between nodes
+        const loopsEl = document.getElementById('loops');
+        const stableEl = document.getElementById('stable');
+        const msgEl = document.getElementById('msg');
+        
+        let loopCount = 0;
+        let stability = 100;
 
-        // Generate the DNA structure
-        for (let i = 0; i < nodesCount; i++) {
+        // Create the Helix (Same logic as before but more nodes)
+        for (let i = 0; i < 400; i++) {
             const angle = i * 0.2;
-            const x = Math.sin(angle) * 80;
-            const zIndex = Math.cos(angle) > 0 ? 1 : -1;
-
-            // Create Left Node
-            const nodeL = document.createElement('div');
-            nodeL.className = 'node';
-            nodeL.style.top = `${i * spacing}px`;
-            nodeL.style.setProperty('--x', `${x}px`);
-            nodeL.style.opacity = zIndex > 0 ? 1 : 0.3;
-            container.appendChild(nodeL);
-
-            // Create Right Node (Opposite phase)
-            const nodeR = document.createElement('div');
-            nodeR.className = 'node';
-            nodeR.style.top = `${i * spacing}px`;
-            nodeR.style.setProperty('--x', `${-x}px`);
-            nodeR.style.opacity = zIndex > 0 ? 0.3 : 1;
-            container.appendChild(nodeR);
-
-            // Connecting line
-            if (i % 2 === 0) {
-                const line = document.createElement('div');
-                line.className = 'line';
-                line.style.top = `${i * spacing + 5}px`;
-                line.style.setProperty('--w', `${Math.abs(x * 2)}px`);
-                container.appendChild(line);
-            }
+            const x = Math.sin(angle) * 100;
+            const node = document.createElement('div');
+            node.className = 'node';
+            node.style.top = `${i * 25}px`;
+            node.style.setProperty('--x', `${x}px`);
+            container.appendChild(node);
         }
 
-        // Update UI on scroll
         window.addEventListener('scroll', () => {
             const scrolled = window.scrollY;
-            depthEl.innerText = Math.floor(scrolled / 10);
-            
-            // Random color shift based on scroll
-            const hue = (scrolled / 50) % 360;
-            document.body.style.filter = `hue-rotate(${hue}deg)`;
+            const maxScroll = document.body.scrollHeight - window.innerHeight;
+
+            // 🌀 THE TELEPORTATION LOGIC
+            if (scrolled >= maxScroll - 2) {
+                // Teleport to top
+                window.scrollTo(0, 2);
+                
+                // Trigger Dimension Shift
+                loopCount++;
+                stability -= 5;
+                loopsEl.innerText = loopCount;
+                stableEl.innerText = Math.max(0, stability) + "%";
+
+                // Visual Mind-Bend
+                document.body.classList.add('glitch');
+                setTimeout(() => document.body.classList.remove('glitch'), 500);
+
+                // Rotate Reality every 2 loops
+                if (loopCount % 2 === 0) {
+                    document.body.style.transform = "rotate(180deg)";
+                    msgEl.innerText = "REALITY INVERTED";
+                } else {
+                    document.body.style.transform = "rotate(0deg)";
+                    msgEl.innerText = "RECURSION ACTIVE";
+                }
+            }
+
+            // Hue shift as we descend
+            const hue = (scrolled / 20) % 360;
+            document.body.style.filter = `hue-rotate(${hue}deg) brightness(${stability/100})`;
         });
     </script>
 </body>
